@@ -29,20 +29,21 @@ public:
 		strcpy(_str, str);
 	}
 
-	//拷贝构造:深拷贝
+	//拷贝构造:深拷贝 用一个已经存在的对象创建一个新的的对象, 开空间+内容拷贝
 	/*String(const String& str)
 	:_str(new char[str._capacity + 1])
 	, _size(str._size)
 	, _capacity(str._capacity){
 	strcpy(_str, str._str);
 	}*/
-	//拷贝构造的现代写法
+
+	//拷贝构造的现代写法 --> 代码复用 (推荐) 出错概率小
 	String(const String& str)
 		:_str(nullptr)
 		, _capacity(0)
 		, _size(0){
-		String tmp(str._str);
-		Swap(tmp);
+		String tmp(str._str);   // 创建临时对象式已经完成了开空间和内容拷贝, 
+		Swap(tmp);  // 所以现在只需要进行交换即可
 	}
 
 	void Swap(String& str){
@@ -53,17 +54,18 @@ public:
 
 	//String& operator=(const String& str){
 	//	if (this != &str){
-	//		//释放原有资源
+	//		// 释放原有资源
 	//		delete[] _str;
-	//		//开新空间
+	//		// 开新空间
 	//		_str = new char[str._capacity + 1];
-	//		//拷贝字符串内容
+	//		// 拷贝字符串内容
 	//		strcpy(_str, str._str);
 	//		_size = str._size;
 	//		_capacity = str._capacity;
 	//	}
 	//	return *this;
 	//}
+
 	//赋值运算符现代写法
 	//第一种写法
 	String& operator=(String str){
@@ -89,11 +91,13 @@ public:
 		}
 	}
 
-	//遍历：1. operator[] + size   2. 迭代器  3. 范围for
+	//遍历：1. operator[] + size(类似于数组的访问形式)   2. 迭代器  3. 范围for
 
 	//[]方括号运算符重载: char ch = string[pos]
 	//获取pos位置的字符
-	//可读可写： 返回值类型为引用
+	//可读可写： 返回值类型为引用, 这样才会让operator接口变成可读可写
+	// 返回值只能去读, 不能去修改, 传引用可以进行修改
+	// 加了const就只读, 不加const可读可写
 	char& operator[](size_t pos){
 		if (pos < _size)
 			return _str[pos];
@@ -101,10 +105,11 @@ public:
 	size_t size(){
 		return _size;
 	}
-	//迭代器： 可读可写
+
+	//迭代器： 可读可写 利用原生指针操作
 	//迭代器区间：左闭右开 [begin, end]
 	iterator begin(){
-		//第一个元素的位置
+		//第一个元素的位置  开的空间的第一个位置
 		return _str;
 	}
 
@@ -113,7 +118,7 @@ public:
 		return _str + _size;
 	}
 
-	//只读迭代器
+	//只读迭代器(const)  
 	const_iterator begin() const{
 		return _str;
 	}
@@ -142,6 +147,9 @@ void printString(const String& str){
 	}
 	cout << endl;
 
+	// 范围for, 左边是要遍历的字符, 右边是遍历的范围
+	// 接收的变量必须是引用类型, 可以去修改元素本身, 如果是值的话, 需要先拷贝再遍历, 不能修改
+	// 本身也是通过迭代器实现的, 借助迭代器
 	for (auto& ch : str){
 		cout << ch << " ";
 		//ch = 'a';
